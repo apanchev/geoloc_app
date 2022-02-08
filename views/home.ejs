@@ -1,0 +1,212 @@
+<html>
+  <head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+  </head>
+
+  <body>
+    <div id="element"></div>
+    <div class="container">
+      <center><h1>Admin Panel</h1></center>
+      <!-- <hr/> -->
+      <div class="row justify-content-end mt-5">
+        <div class="col-md-6">
+          <h1><u>Database infos</u></h1>
+          <h2>Number of bands: <a id="band">0</a></h2>
+          <h2>Number of concerts: <a id="concert">0</a></h2>
+          <h2>Number of venues: <a id="venue">0</a></h2>
+        </div>
+        <div class="col-md-6">
+          Database options :
+          <button onclick="dbInitialize()" class="btn btn-success">Initialize</button>
+          <button onclick="dbDestroy()" class="btn btn-danger">Destroy</button></a><br/><br/>
+          Datasets options :
+          <button onclick="dbLoad()" class="btn btn-primary">Load default dataset</button>
+        </div>
+      </div>
+    </div>
+
+    <div><hr></div>
+
+    
+    <div class="container">
+      <div class="row d-flex justify-content-center">
+        <div class="col-md-6 d-flex justify-content-center">
+          <h1>Search Panel</h1>
+        </div>
+      </div>
+      <div class="row mt-4">
+        <div class="col-md-5">
+            <div class="row">
+              Band Ids
+              <input id="bands" type="text" name="bandIds">
+            </div>
+            <div class="row mt-1">
+              Latitude
+              <input type="text" name="latitude" id="latitude" value="">
+            </div>
+            <div class="row mt-1">
+              Longitude
+              <input type="text" name="longitude" id="longitude" value="">
+            </div>
+            <div class="row mt-1">
+              Radius
+              <input type="text" name="radius" id="radius">
+            </div>
+          <div class="row mt-3">
+            <div class="col-md-6 d-flex justify-content-center">
+              <button id="buttonRandom" class="btn btn-danger" style="width: 70%;" onclick="formRandom()">Random</button>
+            </div>
+            <div class="col-md-6 d-flex justify-content-center">
+              <button id="buttonValid" class="btn btn-success" style="width: 70%;" onclick="formSearch()">Validate</button>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-1"></div>
+        <div class="col-md-6">
+          Number of results: <a id="nbRes">0</a>
+          <textarea name="" id="result" style="width: 100%;height: 100%;"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 11">
+      <div id="liveToast1" class="toast bg-primary text-white" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="false">
+        <div class="d-flex">
+          <div id="toast-body1" class="toast-body">
+          </div>
+          <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+      </div>
+      <div id="liveToast0" class="toast bg-primary text-white" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="false">
+        <div class="d-flex">
+          <div id="toast-body0" class="toast-body">
+          </div>
+          <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+      </div>
+    </div>
+
+
+
+  </body>
+
+  <script>
+    setInterval(async () => {
+      await refresh();
+    }, 1000);
+    
+    const setBand = async () => {
+      const resBand = await fetch('/api/get/bands', {method: 'get'});
+      document.getElementById('band').innerHTML = await resBand.text();
+    }
+    const setConcert = async () => {
+      const resConcert = await fetch('/api/get/concerts', {method: 'get'});
+      document.getElementById('concert').innerHTML = await resConcert.text();
+    }
+    const setVenue = async () => {
+      const resVenue = await fetch('/api/get/venues', {method: 'get'});
+      document.getElementById('venue').innerHTML = await resVenue.text();
+    }
+    const refresh = async () => {
+      await setBand();
+      await setConcert();
+      await setVenue();
+    }
+
+    const dbInitialize = async () => {
+      const resBand = await fetch('/database/initialize', {method: 'get'});
+      await refresh();
+      await notif('Initializing database.', 0);
+    };
+
+    const dbDestroy = async () => {
+      const resDestroy = await fetch('/database/destroy', {method: 'get'});
+      await refresh();
+      await notif('Destroying database.', 0);
+    }
+
+    const dbLoad = async () => {
+      const resBand = await fetch('/dataset/load', {method: 'get'});
+      await refresh();
+      await notif('Loading default dataset in background ...', 1);
+    };
+
+    const notif = async (text, toastId) => {
+      console.log(toastId);
+      if (toastId == 1) {
+        document.getElementById('toast-body1').innerHTML = text;
+        const toastLive = document.getElementById('liveToast1');
+        const toast = new bootstrap.Toast(toastLive);
+        toast.show();
+      } else {
+        document.getElementById('toast-body0').innerHTML = text;
+        const toastLive = document.getElementById('liveToast0');
+        const toast = new bootstrap.Toast(toastLive);
+        toast.show();
+      }
+    }
+
+    const formClear = async () => {
+      document.getElementById("formSearch").reset();
+    }
+
+    const buttonDisabled = async => {
+      document.getElementById("buttonRandom").disabled = true;
+      document.getElementById("buttonValid").disabled = true;
+    }
+    const buttonEnabled = async => {
+      document.getElementById("buttonRandom").disabled = false;
+      document.getElementById("buttonValid").disabled = false;
+    }
+
+    const formSearch = async () => {
+      await buttonDisabled();
+      document.getElementById("result").value = "";
+      const ban = document.getElementById("bands").value ? document.getElementById("bands").value : "";
+      const lon = document.getElementById("longitude").value;
+      const lat = document.getElementById("latitude").value;
+      const rad = document.getElementById("radius").value;
+      const params = {
+        "bandIds": ban,
+        "latitude": lat,
+        "longitude": lon,
+        "radius": rad
+      };
+      const headers = {'Content-Type': 'application/json'};
+      const resSearch = await fetch('/api/search', { method: 'POST', headers: headers, body: JSON.stringify(params) });
+      const result = await resSearch.text();
+      const parsed = JSON.parse(result);
+      const jsonRes = JSON.stringify(parsed, null, 2);
+      document.getElementById("result").value = jsonRes;
+      document.getElementById("nbRes").innerHTML = Object.keys(parsed).length;
+      console.log(`json length => ${toString(Object.keys(jsonRes).length)}`);
+      console.log(`json length => ${Object.keys(jsonRes).length}`);
+      console.log(`json length => ${Object.keys(parsed).length}`);
+      // alert(jsonRes.length);
+      console.log(resSearch);
+      console.log(`${lon} | ${lat} | ${rad}`);
+      // document.getElementById("formSearch").submit();
+      await buttonEnabled();
+    }
+
+    const formRandom = async () => {
+      let lonMin = -180;
+      let lonMax = 180;
+      let latMin = -90;
+      let latMax = 90;
+      let radius = Math.floor(Math.random() * (3600 - 0 + 1)) + 0;
+      let lon = Math.floor(Math.random() * (lonMax - lonMin + 1)) + lonMin;
+      let lat = Math.floor(Math.random() * (latMax - latMin + 1)) + latMin;
+      document.getElementById("longitude").value = lon;
+      document.getElementById("latitude").value = lat;
+      document.getElementById("radius").value = radius;
+      // alert(`${lon} | ${lat}`);
+      // document.getElementById("latitude").value = Math.random();
+    }
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      await refresh();
+    });
+  </script>
+</html>

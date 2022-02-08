@@ -1,0 +1,29 @@
+version: "3.8"
+
+networks:
+  app-tier:
+    driver: bridge
+
+services:
+  mysql:
+    container_name: mysql
+    image: percona:latest
+    restart: always
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PWD}
+    networks:
+      - app-tier
+
+  geoloc:
+    container_name: geoloc
+    restart: always
+    image: geoloc
+    build: .
+    ports:
+      - ${PORT}:${PORT}
+    depends_on:
+      - mysql
+    networks:
+      - app-tier
