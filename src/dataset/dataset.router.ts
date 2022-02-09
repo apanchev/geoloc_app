@@ -1,24 +1,24 @@
-import {Request, Response, Router as router} from 'express';
-import {mapSeries} from 'bluebird';
-import {Dataset} from './dataset.service';
+import { Request, Response, Router as router } from 'express';
+import { mapSeries } from 'bluebird';
 import fs from 'fs';
+import Dataset from './dataset.service';
+
 const got = require('got');
 
-export const datasetRouter = router();
+const datasetRouter = router();
 
 datasetRouter.get('/load', async (req: Request, res: Response) => {
   const fileList = [
     ['band', './data/bands.json'],
     ['concert', './data/concerts.json'],
-    ['venue', './data/venues.json']
+    ['venue', './data/venues.json'],
   ];
-  
+
   mapSeries(fileList, async (file) => {
     try {
       const url = `http://localhost:${process.env.PORT}/dataset/load/${file[0]}`;
       const fileBody = await fs.promises.readFile(file[1], 'utf8');
-      // console.debug(JSON.parse(fileBody));
-      const data = await got.put(url, {json: {data: JSON.parse(fileBody)}});
+      const data = await got.put(url, { json: { data: JSON.parse(fileBody) } });
       console.debug(data.statusCode);
     } catch (e) {
       console.error(e);
@@ -30,7 +30,7 @@ datasetRouter.get('/load', async (req: Request, res: Response) => {
 datasetRouter.put('/load/:db', async (req: Request, res: Response) => {
   if (req.params.db && req.body.data) {
     switch (req.params.db) {
-      case "band":
+      case 'band':
         if (await Dataset.loadBandFromVariable(req.params.db, req.body.data)) {
           res.status(200).send('Dataset successfully initialized !');
         } else {
@@ -38,7 +38,7 @@ datasetRouter.put('/load/:db', async (req: Request, res: Response) => {
         }
         break;
 
-      case "venue":
+      case 'venue':
         if (await Dataset.loadVenueFromVariable(req.params.db, req.body.data)) {
           res.status(200).send('Dataset successfully initialized !');
         } else {
@@ -46,7 +46,7 @@ datasetRouter.put('/load/:db', async (req: Request, res: Response) => {
         }
         break;
 
-      case "concert":
+      case 'concert':
         if (await Dataset.loadConcertFromVariable(req.params.db, req.body.data)) {
           res.status(200).send('Dataset successfully initialized !');
         } else {
@@ -62,13 +62,4 @@ datasetRouter.put('/load/:db', async (req: Request, res: Response) => {
   }
 });
 
-// databaseRouter.get('/destroy', async (req: Request, res: Response) => {
-//   const db = await Database.destroy();
-
-//   if (db) {
-//     res.status(200).send('Dropped database successfully !');
-//   } else {
-//     res.status(500).send(`Error, can't drop database ...`);
-//   }
-// });
-
+export default datasetRouter;

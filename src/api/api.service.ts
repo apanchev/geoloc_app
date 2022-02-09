@@ -1,92 +1,87 @@
 import mysql from 'mysql2/promise';
-import { ParameterStatusMessage } from 'pg-protocol/dist/messages';
-import { Database } from '../database/database.service';
+import Database from '../database/database.service';
 
-require('dotenv').config()
+require('dotenv').config();
 
 const globalSql = mysql.createPool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PWD,
-  database: process.env.DB_BASE
+  database: process.env.DB_BASE,
 });
 
-export const Api = { 
+type N = number;
+type NumUn = number | undefined;
+type NumArrUn = number[] | undefined;
+
+const Api = {
   bandIdsValidator: (val: number[] | undefined): number => {
-    if (typeof(val) === "object" && val.length) {
-      return 1
-    } else {
-      return 2;
+    if (typeof (val) === 'object' && val.length) {
+      return 1;
     }
+    return 2;
   },
   latitudeValidator: (val: number | undefined): number => {
-    console.debug(`LATITUDE TYPE => ${typeof(val)}`);
-    if (typeof(val) === 'number') {
+    if (typeof (val) === 'number') {
       if (val >= -90 && val <= 90) {
         return 1;
-      } else {
-        return 0;
       }
-    } else {
-      return 2;
-    }
-  },
-  longitudeValidator: (val: number | undefined): number => {
-    if (typeof(val) === 'number') {
-      if (val >= -180 && val <= 180) {
-        return 1;
-      } else {
-        return 0;
-      }
-    } else {
-      return 2;
-    }
-  },
-  radiusValidator: (val: number | undefined): number => {
-    if (typeof(val) === 'number') {
-      if (val >= 0 && val <= 6371) {
-        return 1;
-      } else {
-        return 0;
-      }
-    } else {
-      return 2;
-    }
-  },
-  
-    parseBandIds: async (bandIds: string | Array <string>): Promise <number[]> => {
-      let arrayStr: Array<string>;
-      let result: Array<number>;
-  
-      if (typeof(bandIds) == "string") {
-        arrayStr = bandIds.split(",").map(i => i.trim());
-        result = arrayStr.map(el => Number(el));
-        result = result.filter((n) => {return n});
-      } else if (typeof(bandIds) == "object") {
-        result = bandIds.map(el => Number(el));
-      } else {
-        result = [];
-      }
-      console.debug(result);
-      return result;
-    },
-
-  checkParams: async (bandIds: number[] | undefined, latitude: number | undefined, longitude: number | undefined, radius: number | undefined): Promise<number> => {
-    const checkBands = Api.bandIdsValidator(bandIds);
-    const checkLatitude = Api.latitudeValidator(latitude);
-    const checkLongitude = Api.longitudeValidator(longitude);
-    const checkRadius = Api.radiusValidator(radius);
-    console.debug(`${checkBands} - ${checkLatitude} - ${checkLongitude} - ${checkRadius}`);
-
-    if (checkBands == 1 && checkLatitude == 1 && checkLongitude == 1 && checkRadius == 1) {
-      return 1;
-    } else if (checkBands == 2 && checkLatitude == 1 && checkLongitude == 1 && checkRadius == 1) {
-      return 2;
-    } else if (checkBands == 1 && checkLatitude == 2 && checkLongitude == 2 && checkRadius == 2) {
-      return 3;
-    } else {
       return 0;
     }
+    return 2;
+  },
+  longitudeValidator: (val: number | undefined): number => {
+    if (typeof (val) === 'number') {
+      if (val >= -180 && val <= 180) {
+        return 1;
+      }
+      return 0;
+    }
+    return 2;
+  },
+  radiusValidator: (val: number | undefined): number => {
+    if (typeof (val) === 'number') {
+      if (val >= 0 && val <= 6371) {
+        return 1;
+      }
+      return 0;
+    }
+    return 2;
+  },
+
+  parseBandIds: async (bandIds: string | Array <string>):
+  Promise <number[]> => {
+    let arrayStr: Array<string>;
+    let result: Array<number>;
+
+    if (typeof bandIds === 'string') {
+      arrayStr = bandIds.split(',').map((i) => i.trim());
+      result = arrayStr.map((el) => Number(el));
+      result = result.filter((n) => n);
+    } else if (typeof bandIds === 'object') {
+      result = bandIds.map((el) => Number(el));
+    } else {
+      result = [];
+    }
+    return result;
+  },
+
+  checkParams: async (bandIds: NumArrUn, lat: NumUn, lon: NumUn, rad: NumUn):
+  Promise<number> => {
+    const checkB = Api.bandIdsValidator(bandIds);
+    const checkLa = Api.latitudeValidator(lat);
+    const checkLo = Api.longitudeValidator(lon);
+    const checkRa = Api.radiusValidator(rad);
+    // console.debug(`${checkB} - ${checkLa} - ${checkLo} - ${checkRa}`);
+
+    if (checkB === 1 && checkLa === 1 && checkLo === 1 && checkRa === 1) {
+      return 1;
+    } if (checkB === 2 && checkLa === 1 && checkLo === 1 && checkRa === 1) {
+      return 2;
+    } if (checkB === 1 && checkLa === 2 && checkLo === 2 && checkRa === 2) {
+      return 3;
+    }
+    return 0;
   },
 
   getTotalBand: async (): Promise<string> => {
@@ -94,11 +89,11 @@ export const Api = {
       const qry = 'SELECT count(*) as c FROM application.band;';
 
       const bandRes = await globalSql.execute(qry);
-      let tmpRes: any = bandRes;
+      const tmpRes: any = bandRes;
 
       return tmpRes[0][0].c;
     } catch (e) {
-      return "-1";
+      return '-1';
     }
   },
   getTotalConcert: async (): Promise<string> => {
@@ -106,11 +101,11 @@ export const Api = {
       const qry = 'SELECT count(*) as c FROM application.concert;';
 
       const concertRes = await globalSql.execute(qry);
-      let tmpRes: any = concertRes;
+      const tmpRes: any = concertRes;
 
       return tmpRes[0][0].c;
     } catch (e) {
-      return "-1";
+      return '-1';
     }
   },
   getTotalVenue: async (): Promise<string> => {
@@ -118,11 +113,11 @@ export const Api = {
       const qry = 'SELECT count(*) as c FROM application.venue;';
 
       const venueRes = await globalSql.execute(qry);
-      let tmpRes: any = venueRes;
+      const tmpRes: any = venueRes;
 
       return tmpRes[0][0].c;
     } catch (e) {
-      return "-1";
+      return '-1';
     }
   },
 
@@ -131,57 +126,61 @@ export const Api = {
     return result;
   },
 
-  radiansToDegres: (rad: number) : number => { return rad * (180 / Math.PI); },
-  degresToRadians: (deg: number) : number => { return deg * (Math.PI / 180); },
+  radiansToDegres: (rad: number) : number => rad * (180 / Math.PI),
+  degresToRadians: (deg: number) : number => deg * (Math.PI / 180),
 
-  geolocGetBoundaries: (latitude: number, longitude: number, radius: number) : { latitudeMin: number, latitudeMax: number, longitudeMin: number, longitudeMax: number } => {
-    const r = radius / 6371;
-    let latitudeMin = latitude - Api.radiansToDegres(r);
-    let latitudeMax = latitude + Api.radiansToDegres(r);
-    let longitudeMin, longitudeMax = 0;
-    console.debug(`radius => ${radius} | longitude => ${longitude} | latitude => ${latitude}`);
-    console.debug(`latitudeMin => ${latitudeMin} | latitudeMax => ${latitudeMax}`);
+  geolocGetBoundaries: (la: N, lo: N, ra: N):
+  { laMin: N, laMax: N, loMin: N, loMax: N } => {
+    const r = ra / 6371;
+    let laMin = la - Api.radiansToDegres(r);
+    let laMax = la + Api.radiansToDegres(r);
+    let loMin; let loMax = 0;
 
-    if (latitudeMin > -90 && latitudeMax < 90) {
-      console.debug("GEOLOC IN IF ...");
-      const delta = Math.asin(Math.sin(r) / Math.cos(Api.degresToRadians(latitude)));
-      const sinR = Math.sin(r);
-      console.debug(`sinR => ${sinR} | typeof ${typeof(sinR)}`);
-      console.debug(`Math.sin(r) => ${Math.sin(r)} | Math.cos(latitude) ${Math.cos(Api.degresToRadians(latitude))} | ${Math.sin(r) / Math.cos(latitude)}`);
-      longitudeMin = longitude - Api.radiansToDegres(delta);
-      console.debug(`r => ${r.toFixed(10)} | DELTA => ${delta} | longitudeMin => ${longitudeMin}`);
-      if (longitudeMin < -180) {
-        longitudeMin += Api.radiansToDegres(Math.PI * 2);
+    if (laMin > -90 && laMax < 90) {
+      const preDelta = Math.sin(r) / Math.cos(Api.degresToRadians(la));
+      const delta = Math.asin(preDelta);
+      loMin = lo - Api.radiansToDegres(delta);
+
+      if (loMin < -180) {
+        loMin += Api.radiansToDegres(Math.PI * 2);
       }
-      longitudeMax = longitude + Api.radiansToDegres(delta);
-      if (longitudeMax > 180) {
-        console.debug(`longitudeMax > 180 => sub ${Api.radiansToDegres(Math.PI * 2)}`);
-        longitudeMax -= Api.radiansToDegres(Math.PI * 2);
+      loMax = lo + Api.radiansToDegres(delta);
+      if (loMax > 180) {
+        loMax -= Api.radiansToDegres(Math.PI * 2);
       }
-      console.debug(`longitude => ${longitudeMin} - ${longitudeMax}`);
-      console.debug(`latitude => ${latitudeMin} - ${latitudeMax}`);
+      // console.debug(`longitude => ${loMin} - ${loMax}`);
+      // console.debug(`latitude => ${laMin} - ${laMax}`);
     } else {
-      console.debug("GEOLOC IN ELSE ...");
-      latitudeMin = Math.max(latitudeMin, -90);
-      latitudeMax = Math.min(latitudeMax, 90);
-      longitudeMin = -180;
-      longitudeMax = 180;
+      laMin = Math.max(laMin, -90);
+      laMax = Math.min(laMax, 90);
+      loMin = -180;
+      loMax = 180;
     }
-    return { "latitudeMin": latitudeMin, "latitudeMax": latitudeMax, "longitudeMin": longitudeMin, "longitudeMax": longitudeMax };
+    return {
+      laMin, laMax, loMin, loMax,
+    };
   },
 
-  searchWithGeoLoc: async (latitude: number, longitude: number, radius: number): Promise <object> => {
-    const { latitudeMin, latitudeMax, longitudeMax, longitudeMin } = Api.geolocGetBoundaries(latitude, longitude, radius);
-    console.debug(`COORDONEE => ${latitudeMin} | ${latitudeMax} | ${longitudeMin} | ${longitudeMax}`);
-    const dbRes = await Database.dbSearchWithGeoloc(latitudeMin, latitudeMax, longitudeMin, longitudeMax);
+  searchWithGeoLoc: async (la: N, lo: N, rad: N):
+  Promise <object> => {
+    const {
+      laMin, laMax, loMin, loMax,
+    } = Api.geolocGetBoundaries(la, lo, rad);
+    // console.debug(`COORDONEE => ${laMin} | ${laMax} | ${loMin} | ${loMax}`);
+    const dbRes = await Database.dbSearchWithGeoloc(laMin, laMax, loMin, loMax);
 
     return dbRes;
   },
 
-  searchWithAllParams: async (bandIds: number[], latitude: number, longitude: number, radius: number): Promise <object> => {
-    const { latitudeMin, latitudeMax, longitudeMax, longitudeMin } = Api.geolocGetBoundaries(latitude, longitude, radius);
-    const dbRes = await Database.dbSearchWithAll(bandIds, latitudeMin, latitudeMax, longitudeMin, longitudeMax);
+  searchWithAllParams: async (bIds: number[], la: N, lo: N, rad: N):
+  Promise <object> => {
+    const {
+      laMin, laMax, loMin, loMax,
+    } = Api.geolocGetBoundaries(la, lo, rad);
+    const d = await Database.dbSearchWithAll(bIds, laMin, laMax, loMin, loMax);
 
-    return dbRes;
+    return d;
   },
 };
+
+export default Api;

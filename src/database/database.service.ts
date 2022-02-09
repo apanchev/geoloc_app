@@ -1,11 +1,7 @@
-// import express, { Request, Response } from 'express';
-import {Pool, QueryResult} from 'pg';
-import log from 'fancy-log';
 import mysql from 'mysql2/promise';
-import Bluebird from 'bluebird';
+require('log-timestamp')(() => { return `[${new Date().toLocaleString('fr-FR').replace('à', '-')}] %s` });
 
-// import * as dotenv from 'dotenv';
-require('dotenv').config()
+require('dotenv').config();
 
 export const globalSql = mysql.createPool({
   host: process.env.DB_HOST,
@@ -13,11 +9,13 @@ export const globalSql = mysql.createPool({
   password: process.env.DB_PWD,
 });
 
-export const Database = {
+type N = number;
+type S = string;
+
+const Database = {
   initialize: async (): Promise<boolean> => {
     try {
       const qryDb = `CREATE DATABASE ${process.env.DB_BASE}`;
-      const qrySchema = `CREATE SCHEMA ${process.env.DB_BASE}`;
       const qryBrand = `CREATE TABLE ${process.env.DB_BASE}.band (
         id int NOT NULL PRIMARY KEY AUTO_INCREMENT,
         name VARCHAR (255) NOT NULL
@@ -33,6 +31,7 @@ export const Database = {
         latitude FLOAT NOT NULL,
         longitude FLOAT NOT NULL
       ) ENGINE=MyISAM DEFAULT CHARSET=utf8`;
+      console.info(`INITIALIZING DATABASE ...`);
 
       await globalSql.execute(qryDb);
       await globalSql.execute(qryBrand);
@@ -40,7 +39,7 @@ export const Database = {
       await globalSql.execute(qryVenue);
       return true;
     } catch (e) {
-      log.error(e);
+      console.error(e);
       return false;
     }
   },
@@ -79,7 +78,7 @@ export const Database = {
       return false;
     }
   },
-  insertVenue: async (id: string, name: string, latitude: string, longitude: string): Promise<boolean> => {
+  insertVenue: async (id: S, name: S, latitude: S, longitude: S): Promise<boolean> => {
     try {
       const qry = `INSERT INTO ${process.env.DB_BASE}.venue (id, name, latitude, longitude) VALUES (?, ?, ? ,?)`;
 
@@ -91,22 +90,18 @@ export const Database = {
     }
   },
 
-  dbSearchWithGeoloc: async (latitudeMin: number, latitudeMax: number, longitudeMin: number, longitudeMax: number): Promise<[]> => {
+  dbSearchWithGeoloc: async (latitudeMin: N, latitudeMax: N, longitudeMin: N, longitudeMax: N):
+  Promise<[]> => {
     try {
-      let qrySearchWithGeoloc= `SELECT b.name as name, v.name as location, date, latitude, longitude FROM ${process.env.DB_BASE}.concert as c JOIN ${process.env.DB_BASE}.venue as v ON venueId = v.id JOIN ${process.env.DB_BASE}.band as b ON b.id = bandId WHERE (latitude >= ? AND latitude <= ?) AND (longitude >= ? AND longitude <= ?) ORDER BY c.date DESC`;
-      let test = `SELECT b.name, v.name, date, latitude, longitude FROM concert as c JOIN venue as v ON venueId = v.id JOIN band as b ON b.id = bandId WHERE (latitude >= ${latitudeMin} AND latitude <= ${latitudeMax}) AND (longitude >= ${longitudeMin} AND longitude <= ${longitudeMax}) ORDER BY c.date DESC`;
-      let qryParams = [latitudeMin, latitudeMax, longitudeMin, longitudeMax];
-      
+      let qrySearchWithGeoloc = `SELECT b.name as name, v.name as location, date, latitude, longitude FROM ${process.env.DB_BASE}.concert as c JOIN ${process.env.DB_BASE}.venue as v ON venueId = v.id JOIN ${process.env.DB_BASE}.band as b ON b.id = bandId WHERE (latitude >= ? AND latitude <= ?) AND (longitude >= ? AND longitude <= ?) ORDER BY c.date DESC`;
+      const qryParams = [latitudeMin, latitudeMax, longitudeMin, longitudeMax];
+
       if (longitudeMax < longitudeMin) {
         qrySearchWithGeoloc = `SELECT b.name as name, v.name as location, date, latitude, longitude FROM ${process.env.DB_BASE}.concert as c JOIN ${process.env.DB_BASE}.venue as v ON venueId = v.id JOIN ${process.env.DB_BASE}.band as b ON b.id = bandId WHERE (latitude >= ? AND latitude <= ?) AND (longitude >= ? AND longitude <= 180) OR (longitude <= ? AND longitude >= -180) ORDER BY c.date DESC`;
-        test = `SELECT * FROM application.venue WHERE (latitude >= ${latitudeMin} AND latitude <= ${latitudeMax}) AND (longitude >= ${longitudeMin} AND longitude <= 180) OR (longitude <= ${longitudeMax} AND longitude >= -180) ORDER BY c.date DESC`;
       }
-      console.debug(test);
-      let result = await globalSql.execute(qrySearchWithGeoloc, qryParams);
-      let res: any = result;
-      
-      console.debug(res[0]);
-      console.debug(`FOUND ${res[0].length} RESULTS !`);
+      const result = await globalSql.execute(qrySearchWithGeoloc, qryParams);
+      const res: any = result;
+
       return res[0];
     } catch (e) {
       console.error(`ERROR: Can't SELECT from database.\n${e}`);
@@ -114,24 +109,18 @@ export const Database = {
     }
   },
 
-
-  dbSearchWithAll: async (bandIds: number[], latitudeMin: number, latitudeMax: number, longitudeMin: number, longitudeMax: number): Promise<[]> => {
+  dbSearchWithAll: async (bandIds: number[], laMin: N, laMax: N, loMin: N, loMax: N):
+  Promise<[]> => {
     try {
       let qrySearchWithAllParams = `SELECT b.name as name, v.name as location, date, latitude, longitude FROM ${process.env.DB_BASE}.concert as c JOIN ${process.env.DB_BASE}.venue as v ON venueId = v.id JOIN ${process.env.DB_BASE}.band as b ON b.id = bandId WHERE (latitude >= ? AND latitude <= ?) AND (longitude >= ? AND longitude <= ?) AND b.id IN (${bandIds.join(', ')}) ORDER BY c.date DESC`;
-      let test = `SELECT b.name, v.name, date, latitude, longitude FROM concert as c JOIN venue as v ON venueId = v.id JOIN band as b ON b.id = bandId WHERE (latitude >= ${latitudeMin} AND latitude <= ${latitudeMax}) AND (longitude >= ${longitudeMin} AND longitude <= ${longitudeMax}) ORDER BY c.date DESC`;
-      
-      if (longitudeMax < longitudeMin) {
+
+      if (loMax < loMin) {
         qrySearchWithAllParams = `SELECT b.name as name, v.name as location, date, latitude, longitude FROM ${process.env.DB_BASE}.concert as c JOIN ${process.env.DB_BASE}.venue as v ON venueId = v.id JOIN ${process.env.DB_BASE}.band as b ON b.id = bandId WHERE (latitude >= ? AND latitude <= ?) AND (longitude >= ? AND longitude <= 180) OR (longitude <= ? AND longitude >= -180) AND b.id IN (${bandIds.join(', ')}) ORDER BY c.date DESC`;
-        test = `SELECT * FROM application.venue WHERE (latitude >= ${latitudeMin} AND latitude <= ${latitudeMax}) AND (longitude >= ${longitudeMin} AND longitude <= 180) OR (longitude <= ${longitudeMax} AND longitude >= -180) ORDER BY c.date DESC`;
       }
-      console.debug(test);
-      console.debug(bandIds);
-      console.debug(qrySearchWithAllParams);
-      let dbRes = await globalSql.execute(qrySearchWithAllParams, [latitudeMin, latitudeMax, longitudeMin, longitudeMax]);
-      let result: any = dbRes;
-      
-      console.debug(result[0]);
+      const dbRes = await globalSql.execute(qrySearchWithAllParams, [laMin, laMax, loMin, loMax]);
+      const result: any = dbRes;
       console.debug(`FOUND ${result[0].length} RESULTS !`);
+
       return result[0];
     } catch (e) {
       console.error(`ERROR: Can't SELECT from database.\n${e}`);
@@ -141,10 +130,9 @@ export const Database = {
 
   dbSearchWithBand: async (bandIds: number[]): Promise<[]> => {
     try {
-      let qryWithBands = `SELECT b.name as name, v.name as location, date, latitude, longitude FROM ${process.env.DB_BASE}.concert as c JOIN ${process.env.DB_BASE}.venue as v ON venueId = v.id JOIN ${process.env.DB_BASE}.band as b ON b.id = bandId WHERE b.id IN (${bandIds.join(', ')}) ORDER BY c.date DESC`;
-      console.debug(qryWithBands);
-      let dbRes = await globalSql.execute(qryWithBands);
-      let result: any = dbRes;
+      const qryWithBands = `SELECT b.name as name, v.name as location, date, latitude, longitude FROM ${process.env.DB_BASE}.concert as c JOIN ${process.env.DB_BASE}.venue as v ON venueId = v.id JOIN ${process.env.DB_BASE}.band as b ON b.id = bandId WHERE b.id IN (${bandIds.join(', ')}) ORDER BY c.date DESC`;
+      const dbRes = await globalSql.execute(qryWithBands);
+      const result: any = dbRes;
 
       return result[0];
     } catch (e) {
@@ -153,3 +141,5 @@ export const Database = {
     }
   },
 };
+
+export default Database;

@@ -1,25 +1,29 @@
 import * as dotenv from 'dotenv';
 import express from 'express';
-import path from 'path';
-// import log from 'fancy-log';
 
-import {apiRouter} from './api/api.router';
-import {databaseRouter} from './database/database.router';
-import {datasetRouter} from './dataset/dataset.router';
-import {homeRouter} from './home/home.router';
+import apiRouter from './api/api.router';
+import databaseRouter from './database/database.router';
+import datasetRouter from './dataset/dataset.router';
+import homeRouter from './home/home.router';
 
-dotenv.config();
+if (process.env.NODE_ENV === 'production') {
+  console.debug(process.env.NODE_ENV);
+  dotenv.config();
+}
+if (process.env.NODE_ENV === 'dev') {
+  console.debug(process.env.NODE_ENV);
+  dotenv.config({ path: './.env-dev' });
+}
 
 if (!process.env.PORT) {
+  console.error('NO PORT SELECTED TO RUN THE APP ...');
   process.exit(1);
 }
 
 const app = express();
 
-app.use(express.json({limit: '500mb'}));
+app.use(express.json({ limit: '500mb' }));
 app.set('view engine', 'ejs');
-// app.set('views', path.join(__dirname, "views"));
-// app.use(express.static(path.join(__dirname, '../views')));
 
 // Routes
 

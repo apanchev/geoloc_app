@@ -1,19 +1,18 @@
 import fs from 'fs';
-import {mapSeries} from 'bluebird';
-import { datasetRouter } from './dataset.router';
-import {Database} from '../database/database.service';
+import { mapSeries } from 'bluebird';
+import Database from '../database/database.service';
 
-// import * as dotenv from 'dotenv';
 require('dotenv').config();
 
-export const Dataset = {
+type S = string;
+
+const Dataset = {
   checkFileStatus: async (filePath: string): Promise<boolean> => {
     try {
       if (fs.existsSync(filePath)) {
         return true;
-      } else {
-        return false;
       }
+      return false;
     } catch (e) {
       return false;
     }
@@ -24,17 +23,16 @@ export const Dataset = {
 
     if (dbCheck.includes(db)) {
       return true;
-    } else {
-      return false;
     }
+    return false;
   },
 
   loadBandFromVariable: async (db: string, rows: any): Promise<boolean> => {
     console.info(`TRYING TO LOAD BANDS, TOTAL COUNT => ${rows.length}`);
-    const map = await mapSeries(rows, async (entity: { id: string, name: string }) => {
+    await mapSeries(rows, async (entity: { id: string, name: string }) => {
       try {
         await Database.insertBand(entity.id, entity.name);
-        return [true, ""];
+        return [true, ''];
       } catch (e) {
         console.error(e);
         return [false, entity.name];
@@ -44,9 +42,8 @@ export const Dataset = {
   },
   loadConcertFromVariable: async (db: string, rows: any): Promise<boolean> => {
     console.info(`TRYING TO LOAD CONCERTS, TOTAL COUNT => ${rows.length}`);
-    const map = await mapSeries(rows, async (entity: { venueId: string, bandId: string, date: string }) => {
+    await mapSeries(rows, async (entity: { venueId: string, bandId: string, date: string }) => {
       try {
-        // console.debug(`ENTITY ===> ${entity}`);
         Database.insertConcert(entity.venueId, entity.bandId, entity.date);
         return true;
       } catch (e) {
@@ -58,15 +55,17 @@ export const Dataset = {
   },
   loadVenueFromVariable: async (db: string, rows: any): Promise<boolean> => {
     console.info(`TRYING TO LOAD VENUES, TOTAL COUNT => ${rows.length}`);
-    const map = await mapSeries(rows, async (entity: { id: string, name: string, latitude: string, longitude: string, }) => {
+    await mapSeries(rows, async (el: { id: S, name: S, la: S, lo: S, }) => {
       try {
-        await Database.insertVenue(entity.id, entity.name, entity.latitude, entity.longitude);
-        return [true, ""];
+        await Database.insertVenue(el.id, el.name, el.la, el.lo);
+        return [true, ''];
       } catch (e) {
         console.error(e);
-        return [false, entity.name];
+        return [false, el.name];
       }
     });
     return true;
   },
 };
+
+export default Dataset;
