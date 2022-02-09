@@ -1,4 +1,4 @@
-import { Api } from '../src/api/api.service';
+import Api from '../src/api/api.service';
 // import {Database} from '../src/database/database.service';
 
 describe('TESTING => checkParams', () => {
