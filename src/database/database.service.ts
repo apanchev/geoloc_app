@@ -7,6 +7,11 @@ export const globalSql = mysql.createPool({
   user: process.env.DB_USER,
   password: process.env.DB_PWD,
 });
+export const globalSqlSearch = mysql.createPool({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PWD,
+});
 export const globalSqlWatch = mysql.createPool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
@@ -140,7 +145,7 @@ const Database = {
       if (longitudeMax < longitudeMin) {
         qrySearchWithGeoloc = `SELECT b.name as name, v.name as location, date, latitude, longitude FROM ${process.env.DB_BASE}.concert as c JOIN ${process.env.DB_BASE}.venue as v ON venueId = v.id JOIN ${process.env.DB_BASE}.band as b ON b.id = bandId WHERE (latitude >= ? AND latitude <= ?) AND (longitude >= ? AND longitude <= 180) OR (longitude <= ? AND longitude >= -180) ORDER BY c.date DESC`;
       }
-      const result = await globalSql.execute(qrySearchWithGeoloc, qryParams);
+      const result = await globalSqlSearch.execute(qrySearchWithGeoloc, qryParams);
       const res: any = result;
 
       return res[0];
@@ -153,12 +158,12 @@ const Database = {
   dbSearchWithAll: async (bandIds: number[], laMin: N, laMax: N, loMin: N, loMax: N):
   Promise<[]> => {
     try {
-      let qrySearchWithAllParams = `SELECT b.name as name, v.name as location, date, latitude, longitude FROM ${process.env.DB_BASE}.concert as c JOIN ${process.env.DB_BASE}.venue as v ON venueId = v.id JOIN ${process.env.DB_BASE}.band as b ON b.id = bandId WHERE (latitude >= ? AND latitude <= ?) AND (longitude >= ? AND longitude <= ?) AND b.id IN (${bandIds.join(', ')}) ORDER BY c.date DESC`;
+      let qryWithAllParams = `SELECT b.name as name, v.name as location, date, latitude, longitude FROM ${process.env.DB_BASE}.concert as c JOIN ${process.env.DB_BASE}.venue as v ON venueId = v.id JOIN ${process.env.DB_BASE}.band as b ON b.id = bandId WHERE (latitude >= ? AND latitude <= ?) AND (longitude >= ? AND longitude <= ?) AND b.id IN (${bandIds.join(', ')}) ORDER BY c.date DESC`;
 
       if (loMax < loMin) {
-        qrySearchWithAllParams = `SELECT b.name as name, v.name as location, date, latitude, longitude FROM ${process.env.DB_BASE}.concert as c JOIN ${process.env.DB_BASE}.venue as v ON venueId = v.id JOIN ${process.env.DB_BASE}.band as b ON b.id = bandId WHERE (latitude >= ? AND latitude <= ?) AND (longitude >= ? AND longitude <= 180) OR (longitude <= ? AND longitude >= -180) AND b.id IN (${bandIds.join(', ')}) ORDER BY c.date DESC`;
+        qryWithAllParams = `SELECT b.name as name, v.name as location, date, latitude, longitude FROM ${process.env.DB_BASE}.concert as c JOIN ${process.env.DB_BASE}.venue as v ON venueId = v.id JOIN ${process.env.DB_BASE}.band as b ON b.id = bandId WHERE (latitude >= ? AND latitude <= ?) AND (longitude >= ? AND longitude <= 180) OR (longitude <= ? AND longitude >= -180) AND b.id IN (${bandIds.join(', ')}) ORDER BY c.date DESC`;
       }
-      const dbRes = await globalSql.execute(qrySearchWithAllParams, [laMin, laMax, loMin, loMax]);
+      const dbRes = await globalSqlSearch.execute(qryWithAllParams, [laMin, laMax, loMin, loMax]);
       const result: any = dbRes;
       console.debug(`FOUND ${result[0].length} RESULTS !`);
 
@@ -172,7 +177,7 @@ const Database = {
   dbSearchWithBand: async (bandIds: number[]): Promise<[]> => {
     try {
       const qryWithBands = `SELECT b.name as name, v.name as location, date, latitude, longitude FROM ${process.env.DB_BASE}.concert as c JOIN ${process.env.DB_BASE}.venue as v ON venueId = v.id JOIN ${process.env.DB_BASE}.band as b ON b.id = bandId WHERE b.id IN (${bandIds.join(', ')}) ORDER BY c.date DESC`;
-      const dbRes = await globalSql.execute(qryWithBands);
+      const dbRes = await globalSqlSearch.execute(qryWithBands);
       const result: any = dbRes;
 
       return result[0];

@@ -20,7 +20,7 @@
           <button onclick="dbInitialize()" class="btn btn-success">Initialize</button>
           <button onclick="dbDestroy()" class="btn btn-danger">Destroy</button></a><br/><br/>
           Datasets options :
-          <button onclick="dbLoad()" class="btn btn-primary">Load default dataset</button>
+          <button id="btLoad" onclick="dbLoad()" class="btn btn-primary">Load default dataset</button>
         </div>
       </div>
     </div>
@@ -126,6 +126,7 @@
     }
 
     const dbLoad = async () => {
+      document.getElementById("btLoad").disabled = true;
       const resBand = await fetch('/dataset/load', {method: 'get'});
       await refresh();
       await notif('Loading default dataset in background ...', 1);
@@ -150,11 +151,11 @@
       document.getElementById("formSearch").reset();
     }
 
-    const buttonDisabled = async => {
+    const buttonDisabled = async () => {
       document.getElementById("buttonRandom").disabled = true;
       document.getElementById("buttonValid").disabled = true;
     }
-    const buttonEnabled = async => {
+    const buttonEnabled = async () => {
       document.getElementById("buttonRandom").disabled = false;
       document.getElementById("buttonValid").disabled = false;
     }
