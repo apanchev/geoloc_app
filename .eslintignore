@@ -1,3 +1,5 @@
 .eslintrc.js
 babel.config.js
 jest.config.ts
+build
+coverage
