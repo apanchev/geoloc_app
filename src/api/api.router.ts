@@ -9,9 +9,12 @@ apiRouter.post('/search', async (req: Request, res: Response) => {
     bandIds, latitude, longitude, radius,
   } = req.body;
   let result;
-  latitude = Number(latitude);
-  longitude = Number(longitude);
-  radius = Number(radius);
+  console.debug(`${bandIds} | ${latitude} | ${longitude} | ${radius}`);
+  console.debug(`${typeof bandIds} | ${typeof latitude} | ${typeof longitude} | ${typeof radius}`);
+  latitude = latitude ? Number(latitude) : undefined;
+  longitude = longitude ? Number(longitude) : undefined;
+  radius = radius ? Number(radius) : undefined;
+  console.debug(`${bandIds} | ${latitude} | ${longitude} | ${radius}`);
   bandIds = await Api.parseBandIds(bandIds);
   const check = await Api.checkParams(bandIds, latitude, longitude, radius);
 
@@ -29,7 +32,7 @@ apiRouter.post('/search', async (req: Request, res: Response) => {
       res.status(200).json(result);
       break;
     default:
-      res.status(400);
+      res.status(400).send('[]');
   }
 });
 

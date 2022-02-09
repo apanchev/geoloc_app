@@ -89,7 +89,8 @@ const Api = {
     const r = ra / 6371;
     let laMin = la - Api.radiansToDegres(r);
     let laMax = la + Api.radiansToDegres(r);
-    let loMin; let loMax = 0;
+    let loMin = 0;
+    let loMax = 0;
 
     if (laMin > -90 && laMax < 90) {
       const preDelta = Math.sin(r) / Math.cos(Api.degresToRadians(la));
@@ -116,9 +117,7 @@ const Api = {
 
   searchWithGeoLoc: async (la: N, lo: N, rad: N):
   Promise <object> => {
-    const {
-      laMin, laMax, loMin, loMax,
-    } = Api.geolocGetBoundaries(la, lo, rad);
+    const { laMin, laMax, loMin, loMax } = Api.geolocGetBoundaries(la, lo, rad);
     console.debug(`COORDONEE => ${laMin} | ${laMax} | ${loMin} | ${loMax}`);
     const dbRes = await Database.dbSearchWithGeoloc(laMin, laMax, loMin, loMax);
 

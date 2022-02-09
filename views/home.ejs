@@ -37,8 +37,8 @@
       <div class="row mt-4">
         <div class="col-md-5">
             <div class="row">
-              Band Ids
-              <input id="bands" type="text" name="bandIds">
+              Band ID[s] (separated by commas)
+              <input id="bands" type="text" name="bandIds" placeholder="42, 21 ...">
             </div>
             <div class="row mt-1">
               Latitude
@@ -49,8 +49,8 @@
               <input type="text" name="longitude" id="longitude" value="">
             </div>
             <div class="row mt-1">
-              Radius
-              <input type="text" name="radius" id="radius">
+              Radius (number in km)
+              <input type="text" name="radius" id="radius" placeholder="">
             </div>
           <div class="row mt-3">
             <div class="col-md-6 d-flex justify-content-center">
@@ -151,17 +151,17 @@
       document.getElementById("formSearch").reset();
     }
 
-    const buttonDisabled = async () => {
+    const buttonDisabled = () => {
       document.getElementById("buttonRandom").disabled = true;
       document.getElementById("buttonValid").disabled = true;
     }
-    const buttonEnabled = async () => {
+    const buttonEnabled = () => {
       document.getElementById("buttonRandom").disabled = false;
       document.getElementById("buttonValid").disabled = false;
     }
 
     const formSearch = async () => {
-      await buttonDisabled();
+      buttonDisabled();
       document.getElementById("result").value = "";
       const ban = document.getElementById("bands").value ? document.getElementById("bands").value : "";
       const lon = document.getElementById("longitude").value;
@@ -180,13 +180,6 @@
       const jsonRes = JSON.stringify(parsed, null, 2);
       document.getElementById("result").value = jsonRes;
       document.getElementById("nbRes").innerHTML = Object.keys(parsed).length;
-      console.log(`json length => ${toString(Object.keys(jsonRes).length)}`);
-      console.log(`json length => ${Object.keys(jsonRes).length}`);
-      console.log(`json length => ${Object.keys(parsed).length}`);
-      // alert(jsonRes.length);
-      console.log(resSearch);
-      console.log(`${lon} | ${lat} | ${rad}`);
-      // document.getElementById("formSearch").submit();
       await buttonEnabled();
     }
 
@@ -201,8 +194,6 @@
       document.getElementById("longitude").value = lon;
       document.getElementById("latitude").value = lat;
       document.getElementById("radius").value = radius;
-      // alert(`${lon} | ${lat}`);
-      // document.getElementById("latitude").value = Math.random();
     }
 
     document.addEventListener("DOMContentLoaded", async () => {
