@@ -162,7 +162,6 @@
 
     const formSearch = async () => {
       buttonDisabled();
-      document.getElementById("result").value = "";
       const ban = document.getElementById("bands").value ? document.getElementById("bands").value : "";
       const lon = document.getElementById("longitude").value;
       const lat = document.getElementById("latitude").value;
@@ -173,6 +172,7 @@
         "longitude": lon,
         "radius": rad
       };
+      document.getElementById("result").value = "";
       const headers = {'Content-Type': 'application/json'};
       const resSearch = await fetch('/api/search', { method: 'POST', headers: headers, body: JSON.stringify(params) });
       const result = await resSearch.text();

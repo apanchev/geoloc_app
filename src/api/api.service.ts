@@ -33,7 +33,7 @@ const Api = {
   },
   radiusValidator: (val: number | undefined): number => {
     if (typeof (val) === 'number') {
-      if (val >= 0 && val <= 6371) {
+      if (val >= 0) {
         return 1;
       }
       return 0;
