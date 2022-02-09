@@ -139,30 +139,30 @@ describe('TESTING => geolocGetBoundaries', () => {
   test('Test with right param #0', async () => {
     const res = Api.geolocGetBoundaries(48.8814422, 2.3684356, 10);
     const resExpect = {
-      latitudeMax: 48.971374360591874,
-      latitudeMin: 48.79151003940813,
-      longitudeMax: 2.505189814632254,
-      longitudeMin: 2.231681385367746,
+      laMax: 48.971374360591874,
+      laMin: 48.79151003940813,
+      loMax: 2.505189814632254,
+      loMin: 2.231681385367746,
     };
     expect(res).toStrictEqual(resExpect);
   });
   test('Test with latitude = 90', async () => {
     const res = Api.geolocGetBoundaries(90, 2.3684356, 100);
     const resExpect = {
-      latitudeMax: 90,
-      latitudeMin: 89.10067839408127,
-      longitudeMax: 180,
-      longitudeMin: -180,
+      laMax: 90,
+      laMin: 89.10067839408127,
+      loMax: 180,
+      loMin: -180,
     };
     expect(res).toStrictEqual(resExpect);
   });
   test('Test with longitude = 180', async () => {
     const res = Api.geolocGetBoundaries(48.8814422, 179, 100);
     const resExpect = {
-      latitudeMax: 49.78076380591873,
-      latitudeMin: 47.98212059408127,
-      longitudeMax: -179.63238488083155,
-      longitudeMin: 177.63238488083155,
+      laMax: 49.78076380591873,
+      laMin: 47.98212059408127,
+      loMax: -179.63238488083155,
+      loMin: 177.63238488083155,
     };
     expect(res).toStrictEqual(resExpect);
   });
