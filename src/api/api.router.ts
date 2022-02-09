@@ -1,5 +1,6 @@
 import { Request, Response, Router as router } from 'express';
 import Api from './api.service';
+import Database from '../database/database.service';
 
 const apiRouter = router();
 
@@ -33,15 +34,15 @@ apiRouter.post('/search', async (req: Request, res: Response) => {
 });
 
 apiRouter.get('/get/bands', async (req: Request, res: Response) => {
-  const bands = await Api.getTotalBand();
+  const bands = await Database.getTotalBand();
   res.send(String(bands));
 });
 apiRouter.get('/get/concerts', async (req: Request, res: Response) => {
-  const concerts = await Api.getTotalConcert();
+  const concerts = await Database.getTotalConcert();
   res.send(String(concerts));
 });
 apiRouter.get('/get/venues', async (req: Request, res: Response) => {
-  const venues = await Api.getTotalVenue();
+  const venues = await Database.getTotalVenue();
   res.send(String(venues));
 });
 

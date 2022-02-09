@@ -1,14 +1,6 @@
-import mysql from 'mysql2/promise';
 import Database from '../database/database.service';
 
 require('dotenv').config();
-
-const globalSql = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PWD,
-  database: process.env.DB_BASE,
-});
 
 type N = number;
 type NumUn = number | undefined;
@@ -82,43 +74,6 @@ const Api = {
       return 3;
     }
     return 0;
-  },
-
-  getTotalBand: async (): Promise<string> => {
-    try {
-      const qry = 'SELECT count(*) as c FROM application.band;';
-
-      const bandRes = await globalSql.execute(qry);
-      const tmpRes: any = bandRes;
-
-      return tmpRes[0][0].c;
-    } catch (e) {
-      return '-1';
-    }
-  },
-  getTotalConcert: async (): Promise<string> => {
-    try {
-      const qry = 'SELECT count(*) as c FROM application.concert;';
-
-      const concertRes = await globalSql.execute(qry);
-      const tmpRes: any = concertRes;
-
-      return tmpRes[0][0].c;
-    } catch (e) {
-      return '-1';
-    }
-  },
-  getTotalVenue: async (): Promise<string> => {
-    try {
-      const qry = 'SELECT count(*) as c FROM application.venue;';
-
-      const venueRes = await globalSql.execute(qry);
-      const tmpRes: any = venueRes;
-
-      return tmpRes[0][0].c;
-    } catch (e) {
-      return '-1';
-    }
   },
 
   searchWithBand: async (bandIds: number[]): Promise <object> => {

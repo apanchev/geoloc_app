@@ -1,5 +1,4 @@
 import mysql from 'mysql2/promise';
-require('log-timestamp')(() => { return `[${new Date().toLocaleString('fr-FR').replace('à', '-')}] %s` });
 
 require('dotenv').config();
 
@@ -31,7 +30,7 @@ const Database = {
         latitude FLOAT NOT NULL,
         longitude FLOAT NOT NULL
       ) ENGINE=MyISAM DEFAULT CHARSET=utf8`;
-      console.info(`INITIALIZING DATABASE ...`);
+      console.info('INITIALIZING DATABASE ...');
 
       await globalSql.execute(qryDb);
       await globalSql.execute(qryBrand);
@@ -53,6 +52,43 @@ const Database = {
     } catch (e) {
       console.error(e);
       return false;
+    }
+  },
+
+  getTotalBand: async (): Promise<string> => {
+    try {
+      const qry = `SELECT count(*) as c FROM ${process.env.DB_BASE}.band;`;
+
+      const bandRes = await globalSql.execute(qry);
+      const tmpRes: any = bandRes;
+
+      return tmpRes[0][0].c;
+    } catch (e) {
+      return '-1';
+    }
+  },
+  getTotalConcert: async (): Promise<string> => {
+    try {
+      const qry = `SELECT count(*) as c FROM ${process.env.DB_BASE}.concert;`;
+
+      const concertRes = await globalSql.execute(qry);
+      const tmpRes: any = concertRes;
+
+      return tmpRes[0][0].c;
+    } catch (e) {
+      return '-1';
+    }
+  },
+  getTotalVenue: async (): Promise<string> => {
+    try {
+      const qry = `SELECT count(*) as c FROM ${process.env.DB_BASE}.venue;`;
+
+      const venueRes = await globalSql.execute(qry);
+      const tmpRes: any = venueRes;
+
+      return tmpRes[0][0].c;
+    } catch (e) {
+      return '-1';
     }
   },
 
