@@ -5,6 +5,7 @@ import Database from '../database/database.service';
 require('dotenv').config();
 
 type S = string;
+type N = number;
 
 const Dataset = {
   checkFileStatus: async (filePath: string): Promise<boolean> => {
@@ -47,7 +48,7 @@ const Dataset = {
         Database.insertConcert(entity.venueId, entity.bandId, entity.date);
         return true;
       } catch (e) {
-        console.error(e);
+        console.error(`ERROR IN loadConcertFromVariable => ${e}`);
         return false;
       }
     });
@@ -55,12 +56,12 @@ const Dataset = {
   },
   loadVenueFromVariable: async (db: string, rows: any): Promise<boolean> => {
     console.info(`TRYING TO LOAD VENUES, TOTAL COUNT => ${rows.length}`);
-    await mapSeries(rows, async (el: { id: S, name: S, la: S, lo: S, }) => {
+    await mapSeries(rows, async (el: { id: S, name: S, latitude: N, longitude: N }) => {
       try {
-        await Database.insertVenue(el.id, el.name, el.la, el.lo);
+        await Database.insertVenue(el.id, el.name, el.latitude, el.longitude);
         return [true, ''];
       } catch (e) {
-        console.error(e);
+        console.error(`ERROR IN loadVenueFromVariable => ${e}`);
         return [false, el.name];
       }
     });

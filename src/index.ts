@@ -6,13 +6,10 @@ import databaseRouter from './database/database.router';
 import datasetRouter from './dataset/dataset.router';
 import homeRouter from './home/home.router';
 
+dotenv.config();
+
 if (process.env.NODE_ENV === 'production') {
-  console.debug(process.env.NODE_ENV);
-  dotenv.config();
-}
-if (process.env.NODE_ENV === 'dev') {
-  console.debug(process.env.NODE_ENV);
-  dotenv.config({ path: './.env-dev' });
+  console.debug = () => {};
 }
 
 if (!process.env.PORT) {

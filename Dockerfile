@@ -1,4 +1,4 @@
-FROM node:latest
+FROM node:current
 WORKDIR /usr
 COPY package.json ./
 COPY tsconfig.json ./
@@ -6,7 +6,7 @@ COPY src ./src
 RUN npm install
 RUN npm run build
 
-FROM node:latest
+FROM node:current
 WORKDIR /usr
 COPY package.json ./
 COPY tsconfig.json ./

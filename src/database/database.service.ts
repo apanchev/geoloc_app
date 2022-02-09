@@ -7,6 +7,11 @@ export const globalSql = mysql.createPool({
   user: process.env.DB_USER,
   password: process.env.DB_PWD,
 });
+export const globalSqlWatch = mysql.createPool({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PWD,
+});
 
 type N = number;
 type S = string;
@@ -59,7 +64,7 @@ const Database = {
     try {
       const qry = `SELECT count(*) as c FROM ${process.env.DB_BASE}.band;`;
 
-      const bandRes = await globalSql.execute(qry);
+      const bandRes = await globalSqlWatch.execute(qry);
       const tmpRes: any = bandRes;
 
       return tmpRes[0][0].c;
@@ -71,7 +76,7 @@ const Database = {
     try {
       const qry = `SELECT count(*) as c FROM ${process.env.DB_BASE}.concert;`;
 
-      const concertRes = await globalSql.execute(qry);
+      const concertRes = await globalSqlWatch.execute(qry);
       const tmpRes: any = concertRes;
 
       return tmpRes[0][0].c;
@@ -83,7 +88,7 @@ const Database = {
     try {
       const qry = `SELECT count(*) as c FROM ${process.env.DB_BASE}.venue;`;
 
-      const venueRes = await globalSql.execute(qry);
+      const venueRes = await globalSqlWatch.execute(qry);
       const tmpRes: any = venueRes;
 
       return tmpRes[0][0].c;
@@ -110,18 +115,18 @@ const Database = {
       await globalSql.execute(qry, [venueId, bandId, date]);
       return true;
     } catch (e) {
-      console.error(e);
+      console.error(`ERROR in insertConcert => ${e}`);
       return false;
     }
   },
-  insertVenue: async (id: S, name: S, latitude: S, longitude: S): Promise<boolean> => {
+  insertVenue: async (id: S, name: S, latitude: N, longitude: N): Promise<boolean> => {
     try {
       const qry = `INSERT INTO ${process.env.DB_BASE}.venue (id, name, latitude, longitude) VALUES (?, ?, ? ,?)`;
 
       await globalSql.execute(qry, [id, name, latitude, longitude]);
       return true;
     } catch (e) {
-      console.error(e);
+      console.error(`ERROR IN insertVenue => ${e}`);
       return false;
     }
   },

@@ -64,7 +64,7 @@ const Api = {
     const checkLa = Api.latitudeValidator(lat);
     const checkLo = Api.longitudeValidator(lon);
     const checkRa = Api.radiusValidator(rad);
-    // console.debug(`${checkB} - ${checkLa} - ${checkLo} - ${checkRa}`);
+    console.debug(`${checkB} - ${checkLa} - ${checkLo} - ${checkRa}`);
 
     if (checkB === 1 && checkLa === 1 && checkLo === 1 && checkRa === 1) {
       return 1;
@@ -103,8 +103,6 @@ const Api = {
       if (loMax > 180) {
         loMax -= Api.radiansToDegres(Math.PI * 2);
       }
-      // console.debug(`longitude => ${loMin} - ${loMax}`);
-      // console.debug(`latitude => ${laMin} - ${laMax}`);
     } else {
       laMin = Math.max(laMin, -90);
       laMax = Math.min(laMax, 90);
@@ -121,7 +119,7 @@ const Api = {
     const {
       laMin, laMax, loMin, loMax,
     } = Api.geolocGetBoundaries(la, lo, rad);
-    // console.debug(`COORDONEE => ${laMin} | ${laMax} | ${loMin} | ${loMax}`);
+    console.debug(`COORDONEE => ${laMin} | ${laMax} | ${loMin} | ${loMax}`);
     const dbRes = await Database.dbSearchWithGeoloc(laMin, laMax, loMin, loMax);
 
     return dbRes;

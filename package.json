@@ -10,7 +10,7 @@
     "start": "NODE_ENV=production node build/index.js",
     "test": "./node_modules/jest/bin/jest.js __tests__",
     "coverage": "./node_modules/jest/bin/jest.js --coverage __tests__",
-    "lint": "./node_modules/eslint/bin/eslint.js"
+    "lint": "./node_modules/eslint/bin/eslint.js ."
   },
   "repository": {
     "type": "git",

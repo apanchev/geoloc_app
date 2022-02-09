@@ -1,2 +1,2 @@
-docker rm geoloc mariadb percona mysql
+docker rm -f geoloc mariadb percona mysql
 docker image rm geoloc
